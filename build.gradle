@@ -1,10 +1,54 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
+def getGitCommitHash() {
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--short', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (Exception e) {
+        println("Git Failed,please check git" + e)
+        return generateRandomHash()
+    }
+}
+
+def static generateRandomHash() {
+    def letters = "abcdefghijklmnopqrstuvwxyz"
+    def digits = "0123456789"
+    def hash = ""
+
+    hash += letters.charAt((int) (Math.random() * letters.length()))
+    hash += digits.charAt((int) (Math.random() * digits.length()))
+    hash += letters.charAt((int) (Math.random() * letters.length()))
+    hash += digits.charAt((int) (Math.random() * digits.length()))
+    hash += letters.charAt((int) (Math.random() * letters.length()))
+    hash += digits.charAt((int) (Math.random() * digits.length()))
+    hash += letters.charAt((int) (Math.random() * letters.length()))
+    hash += digits.charAt((int) (Math.random() * digits.length()))
+
+    return hash
+}
+
+def static getCurrentDate() {
+    def date = new Date()
+    def dateFormat = new SimpleDateFormat("yyyyMMdd")
+    return dateFormat.format(date)
+}
+
 group = 'top.mc_plfd_host'
-version = '1.0-SNAPSHOT'
+
+if (project."complex-package-version".toBoolean()) {
+    version = project."package-version" + "-" + project."package-type" + "+" + getCurrentDate() + getGitCommitHash()
+} else {
+    version = project."package-version"
+}
 
 repositories {
     mavenCentral()
@@ -18,7 +62,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT")
     
     // Add SnakeYAML as a dependency
-    implementation("org.yaml:snakeyaml:1.30")
+    implementation('org.yaml:snakeyaml:2.0')
 }
 
 tasks {
