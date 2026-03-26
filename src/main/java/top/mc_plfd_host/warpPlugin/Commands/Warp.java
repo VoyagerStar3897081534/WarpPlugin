@@ -49,7 +49,7 @@ public class Warp implements CommandExecutor {
             return true;
         }
 
-        if (!WarpPlugin.checkData("warps."+ args[0] + ".permission") && !sender.getName().contains(WarpPlugin.getData("warps."+ args[0] + ".creator"))) {
+        if (!WarpPlugin.checkData("warps."+ args[0] + ".public") && !sender.getName().contains(WarpPlugin.getData("warps."+ args[0] + ".creator"))) {
             sender.sendMessage(WarpPlugin.getMessages("no_perm"));
             return true;
         }

@@ -30,10 +30,12 @@ public class SetWarp implements CommandExecutor {
 
         if (args.length == 1) {
             sender.sendMessage(WarpPlugin.getMessages("no_get_perm"));
+            return true;
         }
 
         if (!args[1].contains("true") && !args[1].contains("false")) {
             sender.sendMessage(WarpPlugin.getMessages("perm_not_boolean"));
+            return true;
         }
 
         if (WarpPlugin.checkData("warps." + args[0])) {
@@ -48,7 +50,7 @@ public class SetWarp implements CommandExecutor {
 
         WarpPlugin.saveData(sender.getName(), path + ".creator");
         WarpPlugin.saveData(player.getWorld().getName(), path + ".world");
-        WarpPlugin.saveData(perm, path + ".getPermission");
+        WarpPlugin.saveData(perm, path + ".public");
         WarpPlugin.saveData(loc.getX(), path + ".x");
         WarpPlugin.saveData(loc.getY(), path + ".y");
         WarpPlugin.saveData(loc.getZ(), path + ".z");

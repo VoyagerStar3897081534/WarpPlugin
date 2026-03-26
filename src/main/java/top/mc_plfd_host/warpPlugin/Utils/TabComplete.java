@@ -68,8 +68,8 @@ public class TabComplete implements TabCompleter{
 
         for (String warp : warps) {
             if (warp.toLowerCase().startsWith(args[args.length - 1].toLowerCase())) {
-                boolean isPublic = WarpPlugin.checkData("warps." + warp + ".permission") && 
-                                   Boolean.parseBoolean(WarpPlugin.getData("warps." + warp + ".permission"));
+                boolean isPublic = WarpPlugin.checkData("warps." + warp + ".public") &&
+                                   Boolean.parseBoolean(WarpPlugin.getData("warps." + warp + ".public"));
                 boolean isCreator = sender.getName().equals(WarpPlugin.getData("warps." + warp + ".creator"));
                 
                 if (isPublic) {
