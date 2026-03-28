@@ -1,5 +1,5 @@
 name: WarpPlugin
-version: ${version}
+version: @version@
 main: top.mc_plfd_host.warpPlugin.WarpPlugin
 api-version: '1.18'
 folia-supported: true
