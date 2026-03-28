@@ -31,12 +31,22 @@ public final class WarpPlugin extends JavaPlugin {
     private static File dataFile;
     private static File messageFile;
     private static Properties settings;
+    private static boolean isFolia = false;
 
     public static String version;
 
     @Override
     public void onEnable() {
         instance = this;
+        
+        try {
+            Class.forName("io.papermc.paper.threadedregions.ThreadedRegionizer");
+            isFolia = true;
+            getLogger().info("[WarpPlugin] Folia detected! Running in threaded regions mode.");
+        } catch (ClassNotFoundException e) {
+            isFolia = false;
+            getLogger().info("[WarpPlugin] Running in standard Bukkit/Paper mode.");
+        }
         
         try {
             version = instance.getDescription().getVersion();
@@ -89,7 +99,6 @@ public final class WarpPlugin extends JavaPlugin {
         getLogger().info("[WarpPlugin] Enabled!");
         VersionChecker.checkUpdate();
 
-        // 执行初始重载以加载最新配置
         if (WarpPlugin.reload()) {
             getLogger().info("[WarpPlugin] Configuration loaded successfully!");
         }
@@ -166,6 +175,52 @@ public final class WarpPlugin extends JavaPlugin {
             return false;
         }
     }
+
+    public static boolean isFolia() {
+        return isFolia;
+    }
+
+    public static void runTask(Runnable task) {
+        if (isFolia) {
+            // Folia - 使用反射调用 getGlobalRegionScheduler()
+            try {
+                Class<?> bukkitClass = Class.forName("org.bukkit.Bukkit");
+                java.lang.reflect.Method getSchedulerMethod = bukkitClass.getMethod("getGlobalRegionScheduler");
+                Object scheduler = getSchedulerMethod.invoke(null);
+                Class<?> schedulerClass = scheduler.getClass();
+                java.lang.reflect.Method runMethod = schedulerClass.getMethod("run", JavaPlugin.class, java.util.function.Consumer.class);
+                runMethod.invoke(scheduler, instance, (java.util.function.Consumer<Object>) plugin -> task.run());
+            } catch (Exception e) {
+                // 如果反射失败，回退到 Bukkit 调度器
+                Bukkit.getScheduler().runTask(instance, task);
+            }
+        } else {
+            // Bukkit/Paper - 使用 BukkitScheduler
+            Bukkit.getScheduler().runTask(instance, task);
+        }
+    }
+
+    /**
+     * 在 Folia 或 Bukkit 上延迟运行任务
+     * @param task 要执行的任务
+     * @param delay 延迟（tick）
+     */
+    public static void runTaskLater(Runnable task, long delay) {
+        if (isFolia) {
+            try {
+                Class<?> bukkitClass = Class.forName("org.bukkit.Bukkit");
+                java.lang.reflect.Method getSchedulerMethod = bukkitClass.getMethod("getGlobalRegionScheduler");
+                Object scheduler = getSchedulerMethod.invoke(null);
+                Class<?> schedulerClass = scheduler.getClass();
+                java.lang.reflect.Method runDelayedMethod = schedulerClass.getMethod("runDelayed", JavaPlugin.class, java.util.function.Consumer.class, long.class);
+                runDelayedMethod.invoke(scheduler, instance, (java.util.function.Consumer<Object>) plugin -> task.run(), delay);
+            } catch (Exception e) {
+                Bukkit.getScheduler().runTaskLater(instance, task, delay);
+            }
+        } else {
+            Bukkit.getScheduler().runTaskLater(instance, task, delay);
+        }
+    }
 }
 
 class ReloadListener implements Listener {
@@ -183,8 +238,7 @@ class ReloadListener implements Listener {
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         String command = event.getMessage().toLowerCase();
         if (command.equals("/reload") || command.startsWith("/reload ")) {
-            // 标记需要在插件重启用时重新加载配置
-            Bukkit.getScheduler().runTaskLater(WarpPlugin.getInstance(), () -> WarpPlugin.getInstance().getLogger().info("Detected /reload command. Configuration will be reloaded on plugin reload."), 1L);
+            WarpPlugin.runTaskLater(() -> WarpPlugin.getInstance().getLogger().info("Detected /reload command. Configuration will be reloaded on plugin reload."), 1L);
         }
     }
 
@@ -192,8 +246,7 @@ class ReloadListener implements Listener {
     public void onServerCommand(ServerCommandEvent event) {
         String command = event.getCommand().toLowerCase();
         if (command.equals("reload") || command.startsWith("reload ")) {
-            // 标记需要在插件重启用时重新加载配置
-            Bukkit.getScheduler().runTaskLater(WarpPlugin.getInstance(), () -> WarpPlugin.getInstance().getLogger().info("Detected /reload command from console. Configuration will be reloaded on plugin reload."), 1L);
+            WarpPlugin.runTaskLater(() -> WarpPlugin.getInstance().getLogger().info("Detected /reload command from console. Configuration will be reloaded on plugin reload."), 1L);
         }
     }
 }
