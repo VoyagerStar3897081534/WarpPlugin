@@ -48,7 +48,7 @@ def static getCurrentDate() {
 group = 'top.mc_plfd_host'
 
 if (project."complex-package-version".toBoolean()) {
-    version = project."package-version" + "-" + project."package-type" + "+" + getCurrentDate() + getGitCommitHash()
+    version = project."package-version" + "-" + project."package-type" + "-" + getCurrentDate() + getGitCommitHash()
 } else {
     version = project."package-version"
 }
