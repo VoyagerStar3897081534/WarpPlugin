@@ -20,11 +20,12 @@ A simple and powerful warp/teleport management plugin for Minecraft servers.
 
 ### Player Commands
 
-| Command | Permission | Description |
-|---------|------------|-------------|
-| `/setwarp <name>` | `warpplugin.set` | Create a new warp at your location |
-| `/warp <name>` | `warpplugin.warp.<name>` or `warpplugin.warpall` | Teleport to a warp |
-| `/delwarp <name>` | `warpplugin.set` | Delete a warp |
+| Command                     | Permission                                       | Description                        |
+|-----------------------------|--------------------------------------------------|------------------------------------|
+| `/setwarp <name> <plublic>` | `warpplugin.set`                                 | Create a new warp at your location |
+| `/warp <name>`              | `warpplugin.warp.<name>` or `warpplugin.warpall` | Teleport to a warp                 |
+| `/delwarp <name>`           | `warpplugin.set`                                 | Delete a warp                      |
+ | `/publicwarp`               | `warpplugin.warp.<name>` or `warpplugin.warpall` | Public the warps                   |
 
 ### Admin Commands
 
